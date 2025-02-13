@@ -257,10 +257,21 @@ document.addEventListener('DOMContentLoaded', function() {
         let cipherID = urlParams.get("id");
     
         if (cipheredTextFromUrl) {
-            cipheredTextFromUrl = decodeURIComponent(decodeURIComponent(cipheredTextFromUrl)); // Decode twice to match double encoding
-            
+            // Decode Base64 and then decodeURIComponent
+            try {
+                cipheredTextFromUrl = decodeURIComponent(atob(cipheredTextFromUrl));
+            } catch (e) {
+                console.error("Error decoding cipher text:", e);
+            }
         }
     
+        if (cipherID) {
+            try {
+                cipherID = decodeURIComponent(atob(cipherID));
+            } catch (e) {
+                console.error("Error decoding cipher ID:", e);
+            }
+        }
     
 
         if (cipheredTextFromUrl && cipherID) {
@@ -478,11 +489,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const textToShare = cipher.ciphtext;
         const cipherID = cipher.idTag;  // Store ciphID
 
-        // Ensure full encoding of the text
-        const encodedText = encodeURIComponent(textToShare); // First encode
-        const doubleEncodedText = encodeURIComponent(encodedText); // Encode again to prevent truncation
+        // Base64 encode the text and ID
+        const encodedText = btoa(unescape(encodeURIComponent(textToShare)));
+        const encodedID = btoa(unescape(encodeURIComponent(cipherID)));
 
-        const url = `${window.location.origin}${window.location.pathname}?ciph=${encodeURIComponent(doubleEncodedText)}&id=${encodeURIComponent(cipherID)}`;
+        const url = `${window.location.origin}${window.location.pathname}?ciph=${encodedText}&id=${encodedID}`;
 
         function updateMetaTag(property, content) {
             let metaTag = document.querySelector(`meta[property="${property}"]`);
