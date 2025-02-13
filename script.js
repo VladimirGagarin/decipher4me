@@ -473,7 +473,7 @@ document.addEventListener('DOMContentLoaded', function() {
          // Set dynamic meta tags
         const metaTitle = document.createElement("meta");
         metaTitle.setAttribute("property", "og:title");
-        metaTitle.setAttribute("content", "Ciphered Message");
+        metaTitle.setAttribute("content", textToShare);
 
         const metaDescription = document.createElement("meta");
         metaDescription.setAttribute("property", "og:description");
