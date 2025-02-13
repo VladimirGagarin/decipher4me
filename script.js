@@ -251,49 +251,52 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     
-    const params = new URLSearchParams(window.location.search);
-    const cipheredTextFromUrl = params.get("ciph");
-    const cipherID = params.get("id");
+    window.onload = function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        let cipheredTextFromUrl = urlParams.get("ciph");
+        let cipherID = urlParams.get("id"); 
+    
 
-    if (cipheredTextFromUrl && cipherID) {
-        // Find the correct cipher method using ciphID
-        const method = CypherMethods.find(c => c.ciphID === cipherID);
-        
-        if (method) {
-            // find the correspoding family
-            const familyMethods = CypherMethods.filter(c => c.family === method.family);
-        
-            // Find the exact method by both family and ID
-            const methodWithSameFamily =  familyMethods.find(c => c.family === method.family && c.ciphID !== cipherID);
-           
-            // convert text with coresponing family
-            if(methodWithSameFamily){
-                const decipheredText = methodWithSameFamily.action(cipheredTextFromUrl);
-                const familiar = methodWithSameFamily.family;
-                // Store last used family in sessionStorage
-                sessionStorage.setItem("lastUsedFamily", familiar);
-                currentCypher = { name: methodWithSameFamily.name, ciphtext:  decipheredText, originalText:cipheredTextFromUrl, family:familiar, idTag: methodWithSameFamily.ciphID}
-                displayCyphers(currentCypher);
-            }
+        if (cipheredTextFromUrl && cipherID) {
+            // Find the correct cipher method using ciphID
+            const method = CypherMethods.find(c => c.ciphID === cipherID);
             
+            if (method) {
+                // find the correspoding family
+                const familyMethods = CypherMethods.filter(c => c.family === method.family);
             
-        } else {
-            console.error("Cipher method not found for ID:", cipherID);
-            textAreaInput.value = "Invalid Cipher Method";
-            upadateBtns();
-        }
-    } else {
-            navigator.clipboard.readText().then((clipboardText) => {
-            textAreaInput.value = clipboardText.trim() || (currentUserInput?.val ?? "Hello how are you today?");
-            upadateBtns();
-            }).catch((err) => {
-                console.error("Failed to read clipboard: ", err);
-                textAreaInput.value = currentUserInput?.val ?? "Hello how are you today?";
+                // Find the exact method by both family and ID
+                const methodWithSameFamily =  familyMethods.find(c => c.family === method.family && c.ciphID !== cipherID);
+            
+                // convert text with coresponing family
+                if(methodWithSameFamily){
+                    const decipheredText = methodWithSameFamily.action(cipheredTextFromUrl);
+                    const familiar = methodWithSameFamily.family;
+                    // Store last used family in sessionStorage
+                    sessionStorage.setItem("lastUsedFamily", familiar);
+                    currentCypher = { name: methodWithSameFamily.name, ciphtext:  decipheredText, originalText:cipheredTextFromUrl, family:familiar, idTag: methodWithSameFamily.ciphID}
+                    displayCyphers(currentCypher);
+                }
+                
+                
+            } else {
+                console.error("Cipher method not found for ID:", cipherID);
+                textAreaInput.value = "Invalid Cipher Method";
                 upadateBtns();
-            });
-        
-           
-    }
+            }
+        } else {
+                navigator.clipboard.readText().then((clipboardText) => {
+                textAreaInput.value = clipboardText.trim() || (currentUserInput?.val ?? "Hello how are you today?");
+                upadateBtns();
+                }).catch((err) => {
+                    console.error("Failed to read clipboard: ", err);
+                    textAreaInput.value = currentUserInput?.val ?? "Hello how are you today?";
+                    upadateBtns();
+                });
+            
+            
+        }
+    };
     
 
     title.textContent = (container.children.length === 0) ? "Cyphers Loading..." : "Ciphers for you";
@@ -468,24 +471,27 @@ document.addEventListener('DOMContentLoaded', function() {
     async function shareText(cipher) {
         const textToShare = cipher.ciphtext;
         const cipherID = cipher.idTag;  // Store ciphID
-        const url = `${window.location.origin}${window.location.pathname}?ciph=${encodeURIComponent(textToShare)}&id=${encodeURIComponent(cipherID)}`;
 
-         // Set dynamic meta tags
-        const metaTitle = document.createElement("meta");
-        metaTitle.setAttribute("property", "og:title");
-        metaTitle.setAttribute("content", textToShare);
+        // Ensure full encoding of the text
+        const encodedText = encodeURIComponent(textToShare); // First encode
+        const doubleEncodedText = encodeURIComponent(encodedText); // Encode again to prevent truncation
 
-        const metaDescription = document.createElement("meta");
-        metaDescription.setAttribute("property", "og:description");
-        metaDescription.setAttribute("content", `🔐 ${textToShare} 🔓\nDo you want more ciphered text?`);
+        const url = `${window.location.origin}${window.location.pathname}?ciph=${encodeURIComponent(doubleEncodedText)}&id=${encodeURIComponent(cipherID)}`;
 
-        const metaURL = document.createElement("meta");
-        metaURL.setAttribute("property", "og:url");
-        metaURL.setAttribute("content", url);
-
-        document.head.appendChild(metaTitle);
-        document.head.appendChild(metaDescription);
-        document.head.appendChild(metaURL);
+        function updateMetaTag(property, content) {
+            let metaTag = document.querySelector(`meta[property="${property}"]`);
+            if (!metaTag) {
+                metaTag = document.createElement("meta");
+                metaTag.setAttribute("property", property);
+                document.head.appendChild(metaTag);
+            }
+            metaTag.setAttribute("content", content);
+        }
+    
+        updateMetaTag("og:title", textToShare);
+        updateMetaTag("og:description", `🔐Decipher this.`);
+        updateMetaTag("og:url", url);
+    
 
         if (navigator.share) {
             try {
