@@ -254,7 +254,13 @@ document.addEventListener('DOMContentLoaded', function() {
     window.onload = function () {
         const urlParams = new URLSearchParams(window.location.search);
         let cipheredTextFromUrl = urlParams.get("ciph");
-        let cipherID = urlParams.get("id"); 
+        let cipherID = urlParams.get("id");
+    
+        if (cipheredTextFromUrl) {
+            cipheredTextFromUrl = decodeURIComponent(decodeURIComponent(cipheredTextFromUrl)); // Decode twice to match double encoding
+            
+        }
+    
     
 
         if (cipheredTextFromUrl && cipherID) {
