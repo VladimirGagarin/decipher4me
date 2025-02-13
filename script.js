@@ -482,27 +482,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // Share text functionality (if supported)
-    async function shareText(cipher) {
+    function shareText(cipher) {
         const textToShare = cipher.ciphtext;
         const cipherID = cipher.idTag;  // Store ciphID
         const url = `${window.location.origin}${window.location.pathname}?ciph=${encodeURIComponent(textToShare)}&id=${encodeURIComponent(cipherID)}`;
 
          // Set dynamic meta tags
-        const metaTitle = document.createElement("meta");
-        metaTitle.setAttribute("property", "og:title");
-        metaTitle.setAttribute("content", "Ciphered Message");
+        document.querySelector("meta[property='og:title']")?.setAttribute("content", textToShare);
+        document.querySelector("meta[property='og:description']")?.setAttribute("content", `🔐 ${textToShare} 🔓\nDo you want more ciphered text?`);
+        document.querySelector("meta[property='og:url']")?.setAttribute("content", textToShare);
 
-        const metaDescription = document.createElement("meta");
-        metaDescription.setAttribute("property", "og:description");
-        metaDescription.setAttribute("content", `🔐 ${textToShare} 🔓\nDo you want more ciphered text?`);
-
-        const metaURL = document.createElement("meta");
-        metaURL.setAttribute("property", "og:url");
-        metaURL.setAttribute("content", textToShare);
-
-        document.head.appendChild(metaTitle);
-        document.head.appendChild(metaDescription);
-        document.head.appendChild(metaURL);
 
         navigator.clipboard.writeText(url).then(() => {
             alert("Link copied to clipboard. You can now share it!");
