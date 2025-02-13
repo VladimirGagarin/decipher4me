@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decipher4Me</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <meta property="og:title" content="Cipher Text here">
+    <meta property="og:description" content="🔐 Encrypted Text here for more privacy.">
+    <meta property="og:url" content="[Your URL]">
+    <meta property="og:image" content="">
+    <meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="logo.png" alt="logo image" loading="eager">
+        </div>
+    </header>
+    <main>
+        <section>
+            <h2>Enter your text here.</h2>
+            <textarea name="user_input" id="user_input"  placeholder="Write here..."></textarea>
+            <div class="cipherbuttons">
+                <button  disabled>Cipher4Me</button>
+                <button  disabled>Decipher4Me</button>
+
+            </div>
+        </section>
+        <section>
+            <h2>Ciphers for you</h2>
+            <ul id="ListOfCyphers">
+                <!--Samples for li element-->
+            </ul>
+        </section>
+    </main>
+    <div class="overlay-text-preview">
+        <div class="text-content">
+            <h3>Your Text Preview</h3>
+            <div class="orignal-text"></div>
+            <div class="ciphered-text"></div>
+            <div class="text-buttons">
+                <button>Share Cipher</button>
+                <button>Share Original</button>
+                <button>Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="category-overlay">
+        <h2>How Do You Want To <span></span></h2>
+        <ul></ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
