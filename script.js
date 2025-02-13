@@ -251,69 +251,66 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     
-    window.onload = function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        let cipheredTextFromUrl = urlParams.get("ciph");
-        let cipherID = urlParams.get("id");
-    
-        if (cipheredTextFromUrl) {
-            // Decode Base64 and then decodeURIComponent
-            try {
-                cipheredTextFromUrl = decodeURIComponent(atob(cipheredTextFromUrl));
-            } catch (e) {
-                console.error("Error decoding cipher text:", e);
-            }
-        }
-    
-        if (cipherID) {
-            try {
-                cipherID = decodeURIComponent(atob(cipherID));
-            } catch (e) {
-                console.error("Error decoding cipher ID:", e);
-            }
-        }
-    
+    const params = new URLSearchParams(window.location.search);
+    let cipheredTextFromUrl = params.get("ciph");
+    let cipherID = params.get("id");
 
-        if (cipheredTextFromUrl && cipherID) {
-            // Find the correct cipher method using ciphID
-            const method = CypherMethods.find(c => c.ciphID === cipherID);
-            
-            if (method) {
-                // find the correspoding family
-                const familyMethods = CypherMethods.filter(c => c.family === method.family);
-            
-                // Find the exact method by both family and ID
-                const methodWithSameFamily =  familyMethods.find(c => c.family === method.family && c.ciphID !== cipherID);
-            
-                // convert text with coresponing family
-                if(methodWithSameFamily){
-                    const decipheredText = methodWithSameFamily.action(cipheredTextFromUrl);
-                    const familiar = methodWithSameFamily.family;
-                    // Store last used family in sessionStorage
-                    sessionStorage.setItem("lastUsedFamily", familiar);
-                    currentCypher = { name: methodWithSameFamily.name, ciphtext:  decipheredText, originalText:cipheredTextFromUrl, family:familiar, idTag: methodWithSameFamily.ciphID}
-                    displayCyphers(currentCypher);
-                }
-                
-                
-            } else {
-                console.error("Cipher method not found for ID:", cipherID);
-                textAreaInput.value = "Invalid Cipher Method";
-                upadateBtns();
-            }
-        } else {
-                navigator.clipboard.readText().then((clipboardText) => {
-                textAreaInput.value = clipboardText.trim() || (currentUserInput?.val ?? "Hello how are you today?");
-                upadateBtns();
-                }).catch((err) => {
-                    console.error("Failed to read clipboard: ", err);
-                    textAreaInput.value = currentUserInput?.val ?? "Hello how are you today?";
-                    upadateBtns();
-                });
-            
-            
+    if (cipheredTextFromUrl) {
+        try {
+            cipheredTextFromUrl = decodeURIComponent(cipheredTextFromUrl);
+        } catch (e) {
+            console.error("Error decoding cipher text:", e);
         }
-    };
+    }
+    
+    if (cipherID) {
+        try {
+            cipherID = decodeURIComponent(cipherID);
+        } catch (e) {
+            console.error("Error decoding cipher ID:", e);
+        }
+    }
+
+    if (cipheredTextFromUrl && cipherID) {
+        // Find the correct cipher method using ciphID
+        const method = CypherMethods.find(c => c.ciphID === cipherID);
+        
+        if (method) {
+            // find the correspoding family
+            const familyMethods = CypherMethods.filter(c => c.family === method.family);
+        
+            // Find the exact method by both family and ID
+            const methodWithSameFamily =  familyMethods.find(c => c.family === method.family && c.ciphID !== cipherID);
+           
+            // convert text with coresponing family
+            if(methodWithSameFamily){
+                const decipheredText = methodWithSameFamily.action(cipheredTextFromUrl);
+                const familiar = methodWithSameFamily.family;
+                // Store last used family in sessionStorage
+                sessionStorage.setItem("lastUsedFamily", familiar);
+                
+                currentCypher = { name: methodWithSameFamily.name, ciphtext:  decipheredText, originalText:cipheredTextFromUrl, family:familiar, idTag: methodWithSameFamily.ciphID}
+                displayCyphers(currentCypher);
+            }
+            
+            
+        } else {
+            console.error("Cipher method not found for ID:", cipherID);
+            textAreaInput.value = "Invalid Cipher Method";
+            upadateBtns();
+        }
+    } else {
+            navigator.clipboard.readText().then((clipboardText) => {
+            textAreaInput.value = clipboardText.trim() || (currentUserInput?.val ?? "Hello how are you today?");
+            upadateBtns();
+            }).catch((err) => {
+                console.error("Failed to read clipboard: ", err);
+                textAreaInput.value = currentUserInput?.val ?? "Hello how are you today?";
+                upadateBtns();
+            });
+        
+           
+    }
     
 
     title.textContent = (container.children.length === 0) ? "Cyphers Loading..." : "Ciphers for you";
@@ -488,44 +485,28 @@ document.addEventListener('DOMContentLoaded', function() {
     async function shareText(cipher) {
         const textToShare = cipher.ciphtext;
         const cipherID = cipher.idTag;  // Store ciphID
+        const url = `${window.location.origin}${window.location.pathname}?ciph=${encodeURIComponent(textToShare)}&id=${encodeURIComponent(cipherID)}`;
 
-        // Base64 encode the text and ID
-        const encodedText = btoa(unescape(encodeURIComponent(textToShare)));
-        const encodedID = btoa(unescape(encodeURIComponent(cipherID)));
+         // Set dynamic meta tags
+        const metaTitle = document.createElement("meta");
+        metaTitle.setAttribute("property", "og:title");
+        metaTitle.setAttribute("content", "Ciphered Message");
 
-        const url = `${window.location.origin}${window.location.pathname}?ciph=${encodedText}&id=${encodedID}`;
+        const metaDescription = document.createElement("meta");
+        metaDescription.setAttribute("property", "og:description");
+        metaDescription.setAttribute("content", `🔐 ${textToShare} 🔓\nDo you want more ciphered text?`);
 
-        function updateMetaTag(property, content) {
-            let metaTag = document.querySelector(`meta[property="${property}"]`);
-            if (!metaTag) {
-                metaTag = document.createElement("meta");
-                metaTag.setAttribute("property", property);
-                document.head.appendChild(metaTag);
-            }
-            metaTag.setAttribute("content", content);
-        }
-    
-        updateMetaTag("og:title", textToShare);
-        updateMetaTag("og:description", `🔐Decipher this.`);
-        updateMetaTag("og:url", url);
-    
+        const metaURL = document.createElement("meta");
+        metaURL.setAttribute("property", "og:url");
+        metaURL.setAttribute("content", url);
 
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: "Shared Cipher Text",
-                    text: textToShare,
-                    url,  
-                });
-                console.log('Content shared successfully!');
-            } catch (err) {
-                console.error('Sharing failed', err);
-            }
-        } else {
-            navigator.clipboard.writeText(url).then(() => {
-                alert("Link copied to clipboard. You can now share it!");
-            });
-        }
+        document.head.appendChild(metaTitle);
+        document.head.appendChild(metaDescription);
+        document.head.appendChild(metaURL);
+
+        navigator.clipboard.writeText(url).then(() => {
+            alert("Link copied to clipboard. You can now share it!");
+        });
     }
 
     function deleteText(newLi) {
