@@ -498,7 +498,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const metaURL = document.createElement("meta");
         metaURL.setAttribute("property", "og:url");
-        metaURL.setAttribute("content", url);
+        metaURL.setAttribute("content", textToShare);
 
         document.head.appendChild(metaTitle);
         document.head.appendChild(metaDescription);
